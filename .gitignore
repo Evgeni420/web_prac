@@ -1,5 +1,3 @@
 db
 db_script.txt
 db_include.sh
-clear_db.sql
-test_db.sql
