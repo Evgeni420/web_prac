@@ -2,3 +2,15 @@ db
 db_script.txt
 db_include.sh
 in_testing
+
+HELP.md
+.gradle
+build/
+gradle/
+!**/src/main/**/build/
+!**/src/test/**/build/
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+.vscode/
