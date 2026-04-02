@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'jacoco'
 }
 
 group = 'com.booking.bus'
@@ -46,3 +47,13 @@ tasks.withType(JavaCompile) {
 test {
     useTestNG()
 }
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = false
+        html.required = true
+        csv.required = false
+    }
+}
+

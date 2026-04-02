@@ -4,6 +4,9 @@ import com.booking.bus.entity.Company;
 import com.booking.bus.test.BaseTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import com.booking.bus.entity.Route;
+import com.booking.bus.entity.Trip;
+import java.time.ZonedDateTime;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,13 +15,15 @@ import static org.testng.Assert.*;
 
 public class CompanyDAOTest extends BaseTest {
     private CompanyDAO companyDAO;
+    private RouteDAO routeDAO;
+    private TripDAO tripDAO;
 
     @BeforeMethod
     public void init() {
         companyDAO = new CompanyDAO(sessionFactory);
+        routeDAO = new RouteDAO(sessionFactory);
+        tripDAO = new TripDAO(sessionFactory);
     }
-
-    // default
 
     @Test
     public void testSaveAndFind() {
@@ -76,4 +81,37 @@ public class CompanyDAOTest extends BaseTest {
         Optional<Company> found = companyDAO.findById(saved.getId());
         assertFalse(found.isPresent());
     }
+
+    @Test
+    public void testFindByName() {
+        Company company = new Company();
+        company.setName("UniqueName");
+        inTransaction(session -> companyDAO.save(company));
+
+        Company found = companyDAO.findByName("UniqueName");
+        assertNotNull(found);
+        assertEquals(found.getName(), "UniqueName");
+
+        Company notFound = companyDAO.findByName("NonExistent");
+        assertNull(notFound);
+    }
+
+    @Test
+    public void testFindAllWithRoutes() {
+        inTransaction(session -> {
+            Company c = new Company();
+            c.setName("WithRoutes");
+            companyDAO.save(c);
+
+            Route r = new Route();
+            r.setCompany(c);
+            r.setRouteNumber("R1");
+            r.setBusCapacity(30);
+            routeDAO.save(r);
+        });
+
+        List<Company> companies = companyDAO.findAllWithRoutes();
+        assertTrue(companies.stream().anyMatch(c -> "WithRoutes".equals(c.getName())));
+    }
+
 }

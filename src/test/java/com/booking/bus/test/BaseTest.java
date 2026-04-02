@@ -14,7 +14,7 @@ public abstract class BaseTest {
     protected static SessionFactory sessionFactory;
 
     @BeforeSuite
-    public static void setUp() {
+    public void setUp() {
         sessionFactory = new Configuration()
                 .configure("hibernate-test.cfg.xml")
                 .buildSessionFactory();
@@ -44,7 +44,7 @@ public abstract class BaseTest {
             work.accept(session);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null && tx.isActive()) tx.rollback();
             throw e;
         }
     }
@@ -57,7 +57,7 @@ public abstract class BaseTest {
             tx.commit();
             return result;
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null && tx.isActive()) tx.rollback();
             throw e;
         }
     }

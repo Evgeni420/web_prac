@@ -18,8 +18,6 @@ public class ClientDAOTest extends BaseTest {
         clientDAO = new ClientDAO(sessionFactory);
     }
 
-    // default
-
     @Test
     public void testSaveAndFind() {
         Client client = new Client();
@@ -85,5 +83,41 @@ public class ClientDAOTest extends BaseTest {
 
         Optional<Client> found = clientDAO.findById(saved.getId());
         assertFalse(found.isPresent());
+    }
+
+    @Test
+    public void testSearchClients() {
+        Client client = new Client();
+        client.setFullName("Search Me");
+        client.setEmail("search@example.com");
+        inTransaction(session -> clientDAO.save(client));
+
+        List<Client> found = clientDAO.searchClients("Search");
+        assertEquals(found.size(), 1);
+        assertEquals(found.get(0).getFullName(), "Search Me");
+    }
+
+    @Test
+    public void testFindByEmail() {
+        Client client = new Client();
+        client.setFullName("Email Test");
+        client.setEmail("unique@example.com");
+        inTransaction(session -> clientDAO.save(client));
+
+        Client found = clientDAO.findByEmail("unique@example.com");
+        assertNotNull(found);
+        assertEquals(found.getFullName(), "Email Test");
+    }
+
+    @Test
+    public void testFindClientsByTrip() {
+        List<Client> clients = clientDAO.findClientsByTrip(1);
+        assertNotNull(clients);
+    }
+
+    @Test
+    public void testFindClientsByCompany() {
+        List<Client> clients = clientDAO.findClientsByCompany(1);
+        assertNotNull(clients);
     }
 }
