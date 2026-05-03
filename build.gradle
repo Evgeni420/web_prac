@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'jacoco'
+    id 'war'
 }
 
 group = 'com.booking.bus'
@@ -30,10 +31,8 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.13.0'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.0'
 
-    // TestNG
+    // Test
     testImplementation 'org.testng:testng:7.8.0'
-
-    // H2 Database для тестов
     testImplementation 'com.h2database:h2:2.2.224'
 }
 
@@ -57,3 +56,7 @@ jacocoTestReport {
     }
 }
 
+war {
+    archiveFileName = 'bus-booking-05.war'
+    from 'src/main/webapp'
+}
