@@ -9,11 +9,37 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public class RouteDAO extends BaseDAO<Route, Integer> {
 
     public RouteDAO(SessionFactory sessionFactory) {
         super(sessionFactory, Route.class);
+    }
+
+    @Override
+    public List<Route> findAll() {
+        try (var session = sessionFactory.openSession()) {
+            String hql = "SELECT DISTINCT r FROM Route r " +
+                         "LEFT JOIN FETCH r.company " +
+                         "LEFT JOIN FETCH r.stops " +
+                         "ORDER BY r.id";
+            return session.createQuery(hql, Route.class).list();
+        }
+    }
+
+    @Override
+    public Optional<Route> findById(Integer id) {
+        try (var session = sessionFactory.openSession()) {
+            String hql = "SELECT r FROM Route r " +
+                         "LEFT JOIN FETCH r.company " +
+                         "LEFT JOIN FETCH r.stops " +
+                         "WHERE r.id = :id";
+            Route route = session.createQuery(hql, Route.class)
+                                 .setParameter("id", id)
+                                 .uniqueResult();
+            return Optional.ofNullable(route);
+        }
     }
 
     public List<Route> findRoutesByStopsAndDate(String fromStop, String toStop, LocalDate date) {
@@ -22,6 +48,8 @@ public class RouteDAO extends BaseDAO<Route, Integer> {
             ZonedDateTime end = date.plusDays(1).atStartOfDay(ZoneId.systemDefault());
 
             String hql = "SELECT DISTINCT r FROM Route r " +
+                        "LEFT JOIN FETCH r.company " +
+                        "LEFT JOIN FETCH r.stops " +
                         "WHERE EXISTS (SELECT 1 FROM RouteStop s1 WHERE s1.route = r AND s1.stopName = :fromStop) " +
                         "AND EXISTS (SELECT 1 FROM RouteStop s2 WHERE s2.route = r AND s2.stopName = :toStop) " +
                         "AND (SELECT s1.stopIndex FROM RouteStop s1 WHERE s1.route = r AND s1.stopName = :fromStop) < " +
@@ -40,7 +68,10 @@ public class RouteDAO extends BaseDAO<Route, Integer> {
 
     public List<Route> findRoutesByCompany(Integer companyId) {
         try (var session = sessionFactory.openSession()) {
-            String hql = "FROM Route r LEFT JOIN FETCH r.company WHERE r.company.id = :companyId AND r.published = true";
+            String hql = "SELECT DISTINCT r FROM Route r " +
+                        "LEFT JOIN FETCH r.company " +
+                        "LEFT JOIN FETCH r.stops " +
+                        "WHERE r.company.id = :companyId AND r.published = true";
             return session.createQuery(hql, Route.class)
                     .setParameter("companyId", companyId)
                     .list();

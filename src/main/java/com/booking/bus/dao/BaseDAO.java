@@ -25,7 +25,19 @@ public abstract class BaseDAO<T, ID extends Serializable> {
             transaction.commit();
             return entity;
         } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
+            if (transaction != null && transaction.isActive()) {
+                try {
+                    transaction.rollback();
+                } catch (Exception rollbackEx) {
+                    System.err.println("Rollback failed: " + rollbackEx.getMessage());
+                }
+            }
+            System.err.println("Save failed: " + e.getMessage());
+            Throwable cause = e.getCause();
+            while (cause != null) {
+                System.err.println("Caused by: " + cause.getMessage());
+                cause = cause.getCause();
+            }
             throw new RuntimeException("Error saving entity", e);
         }
     }

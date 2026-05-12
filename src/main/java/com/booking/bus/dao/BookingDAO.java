@@ -14,8 +14,15 @@ public class BookingDAO extends BaseDAO<Booking, Integer> {
     }
 
     public List<Booking> findBookingsByClient(Integer clientId) {
-        try (var session = sessionFactory.openSession()) {
-            String hql = "FROM Booking b WHERE b.client.id = :clientId ORDER BY b.createdAt DESC";
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT DISTINCT b FROM Booking b " +
+                         "LEFT JOIN FETCH b.trip t " +
+                         "LEFT JOIN FETCH t.route r " +
+                         "LEFT JOIN FETCH r.company " +
+                         "LEFT JOIN FETCH b.fromStop " +
+                         "LEFT JOIN FETCH b.toStop " +
+                         "WHERE b.client.id = :clientId " +
+                         "ORDER BY b.createdAt DESC";
             return session.createQuery(hql, Booking.class)
                     .setParameter("clientId", clientId)
                     .list();
@@ -23,8 +30,12 @@ public class BookingDAO extends BaseDAO<Booking, Integer> {
     }
 
     public List<Booking> findBookingsByTrip(Integer tripId) {
-        try (var session = sessionFactory.openSession()) {
-            String hql = "FROM Booking b WHERE b.trip.id = :tripId AND b.status != 'cancelled'";
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT b FROM Booking b " +
+                         "LEFT JOIN FETCH b.client " +
+                         "LEFT JOIN FETCH b.fromStop " +
+                         "LEFT JOIN FETCH b.toStop " +
+                         "WHERE b.trip.id = :tripId AND b.status != 'cancelled'";
             return session.createQuery(hql, Booking.class)
                     .setParameter("tripId", tripId)
                     .list();

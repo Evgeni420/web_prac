@@ -11,6 +11,14 @@ public class ClientDAO extends BaseDAO<Client, Integer> {
         super(sessionFactory, Client.class);
     }
 
+    @Override
+    public List<Client> findAll() {
+        try (var session = sessionFactory.openSession()) {
+            String hql = "FROM Client c ORDER BY c.createdAt DESC";
+            return session.createQuery(hql, Client.class).list();
+        }
+    }
+
     public List<Client> searchClients(String searchTerm) {
         try (var session = sessionFactory.openSession()) {
             String hql = "FROM Client c WHERE LOWER(c.fullName) LIKE :search " +

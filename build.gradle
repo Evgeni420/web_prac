@@ -31,9 +31,16 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.13.0'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.0'
 
+    // Spring
+    implementation 'org.springframework:spring-webmvc:5.3.27'
+    implementation 'org.springframework:spring-orm:5.3.27'
+    implementation 'org.springframework:spring-context:5.3.27'
+
     // Test
     testImplementation 'org.testng:testng:7.8.0'
     testImplementation 'com.h2database:h2:2.2.224'
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.15.0'
+    testImplementation 'io.github.bonigarcia:webdrivermanager:5.6.2'
 }
 
 

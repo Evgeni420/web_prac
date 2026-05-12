@@ -2,6 +2,8 @@ package com.booking.bus.dao;
 
 import com.booking.bus.entity.Trip;
 import org.hibernate.SessionFactory;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,11 +11,26 @@ import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TripDAO extends BaseDAO<Trip, Integer> {
 
     public TripDAO(SessionFactory sessionFactory) {
         super(sessionFactory, Trip.class);
+    }
+
+    @Override
+    public Optional<Trip> findById(Integer id) {
+        try (var session = sessionFactory.openSession()) {
+            String hql = "SELECT t FROM Trip t " +
+                         "LEFT JOIN FETCH t.route r " +
+                         "LEFT JOIN FETCH r.company " +
+                         "WHERE t.id = :id";
+            Trip trip = session.createQuery(hql, Trip.class)
+                               .setParameter("id", id)
+                               .uniqueResult();
+            return Optional.ofNullable(trip);
+        }
     }
 
     public List<Trip> findByRouteAndDate(Integer routeId, LocalDate date) {
@@ -77,6 +94,18 @@ public class TripDAO extends BaseDAO<Trip, Integer> {
                 }
             }
             return available;
+        }
+    }
+
+    public void generateTripsForWeek(LocalDate start, LocalDate end) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            String sql = "SELECT generate_trips_for_week(:start, :end)";
+            session.createNativeQuery(sql)
+                   .setParameter("start", start)
+                   .setParameter("end", end)
+                   .executeUpdate();
+            tx.commit();
         }
     }
 }
