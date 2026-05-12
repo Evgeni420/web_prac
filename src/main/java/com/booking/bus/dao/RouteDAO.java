@@ -86,4 +86,14 @@ public class RouteDAO extends BaseDAO<Route, Integer> {
                     .list();
         }
     }
+
+    public Route findByCompanyAndNumber(Integer companyId, String routeNumber) {
+        try (var session = sessionFactory.openSession()) {
+            String hql = "FROM Route r WHERE r.company.id = :companyId AND r.routeNumber = :routeNumber";
+            return session.createQuery(hql, Route.class)
+                    .setParameter("companyId", companyId)
+                    .setParameter("routeNumber", routeNumber)
+                    .uniqueResult();
+        }
+    }
 }

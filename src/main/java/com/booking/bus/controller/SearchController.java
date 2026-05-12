@@ -19,20 +19,6 @@ public class SearchController {
     @Autowired
     private RouteDAO routeDAO;
 
-    @GetMapping("/search")
-    public String searchResults(@RequestParam("from") String fromStop,
-                                @RequestParam("to") String toStop,
-                                @RequestParam("date") String dateStr,
-                                Model model) {
-        LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
-        List<Route> routes = routeDAO.findRoutesByStopsAndDate(fromStop, toStop, date);
-        model.addAttribute("routes", routes);
-        model.addAttribute("fromStop", fromStop);
-        model.addAttribute("toStop", toStop);
-        model.addAttribute("date", dateStr);
-        return "searchResults";
-    }
-
     @PostMapping("/search")
     public String searchResultsPost(@RequestParam String fromStop,
                                     @RequestParam String toStop,

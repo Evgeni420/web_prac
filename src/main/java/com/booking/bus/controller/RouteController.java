@@ -51,13 +51,30 @@ public class RouteController {
     @PostMapping("/new")
     public String addRoute(@ModelAttribute Route route,
                            @RequestParam("companyId") Integer companyId,
-                           @RequestParam("departureTimes") String departureTimesStr,
+                           @RequestParam("departureTimes") String[] departureTimes,
                            @RequestParam("stopName") String[] stopNames,
-                           @RequestParam("stopOffset") Integer[] stopOffsets) {
+                           @RequestParam("stopOffset") Integer[] stopOffsets,
+                           Model model) {
         Company company = companyDAO.findById(companyId).orElse(null);
         if (company == null) return "redirect:/routes";
+        Route existing = routeDAO.findByCompanyAndNumber(companyId, route.getRouteNumber());
+        if (existing != null) {
+            model.addAttribute("error", "Маршрут с номером " + route.getRouteNumber() + " уже существует для выбранной компании");
+            model.addAttribute("route", route);
+            model.addAttribute("companies", companyDAO.findAll());
+            model.addAttribute("stopsList", stopDAO.findAllUniqueStopNames());
+            return "add-route";
+        }
+        if (departureTimes == null || departureTimes.length == 0) {
+            model.addAttribute("error", "Добавьте хотя бы одно время отправления");
+            return "add-route";
+        }
+        if (stopNames == null || stopNames.length < 2) {
+            model.addAttribute("error", "Добавьте хотя бы две остановки");
+            return "add-route";
+        }
         route.setCompany(company);
-        route.setDepartureTimes(departureTimesStr.split(","));
+        route.setDepartureTimes(departureTimes);
         routeDAO.save(route);
 
         for (int i = 0; i < stopNames.length; i++) {
