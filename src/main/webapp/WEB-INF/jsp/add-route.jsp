@@ -6,6 +6,9 @@
     <meta charset="UTF-8">
     <title>Добавить маршрут</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/style.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 </head>
 <body>
     <div class="container">
@@ -60,7 +63,7 @@
                     <label>Остановки:</label>
                     <div id="stops">
                         <div class="stop-row">
-                            <input type="text" name="stopName" placeholder="Название остановки" required>
+                            <input type="text" name="stopName" class="stop-name" placeholder="Название остановки" required>
                             <input type="number" name="stopOffset" placeholder="Время от начала (мин)" required>
                         </div>
                     </div>
@@ -100,12 +103,28 @@
             const div = document.createElement('div');
             div.className = 'stop-row';
             div.innerHTML = `
-                <input type="text" name="stopName" placeholder="Название остановки" required>
+                <input type="text" class="stop-name" name="stopName" placeholder="Название остановки" required>
                 <input type="number" name="stopOffset" placeholder="Время от начала (мин)" required>
                 <button type="button" onclick="this.parentElement.remove()">Удалить</button>
             `;
             container.appendChild(div);
+            initAutocompleteForStop(div.querySelector('.stop-name'));
         }
+
+        function initAutocompleteForStop(element) {
+            $(element).autocomplete({
+                source: function(request, response) {
+                    $.getJSON("${pageContext.request.contextPath}/api/stops", { term: request.term }, response);
+                },
+                minLength: 1
+            });
+        }
+
+        $(document).ready(function() {
+            $('.stop-name').each(function() {
+                initAutocompleteForStop($(this));
+            });
+        });
     </script>
 </body>
 </html>

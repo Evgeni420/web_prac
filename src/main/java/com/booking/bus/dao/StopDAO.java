@@ -35,4 +35,16 @@ public class StopDAO extends BaseDAO<RouteStop, Integer> {
                     .list();
         }
     }
+
+    public List<String> findStopNamesContaining(String term) {
+        try (var session = sessionFactory.openSession()) {
+            String hql = "SELECT DISTINCT rs.stopName FROM RouteStop rs " +
+                         "WHERE LOWER(rs.stopName) LIKE LOWER(:term) " +
+                         "ORDER BY rs.stopName";
+            return session.createQuery(hql, String.class)
+                    .setParameter("term", term.toLowerCase() + "%")
+                    .setMaxResults(10)
+                    .list();
+        }
+    }
 }

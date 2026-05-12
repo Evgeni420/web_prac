@@ -181,4 +181,19 @@ public class BookingSystemTest extends SeleniumBaseTest {
         Assert.assertTrue(found, "Добавленный маршрут не появился в списке");
     }
 
+    // 5. Автодополнение
+    @Test
+    public void testAutocomplete() {
+        goHome();
+        WebElement fromStop = driver.findElement(By.name("fromStop"));
+        fromStop.sendKeys("М");
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".ui-menu-item")));
+
+        driver.findElement(By.xpath("//li[contains(.,'Москва (автовокзал)')]")).click();
+
+        String value = fromStop.getAttribute("value");
+        Assert.assertEquals(value, "Москва (автовокзал)", "Автодополнение не сработало");
+    }
+
 }
